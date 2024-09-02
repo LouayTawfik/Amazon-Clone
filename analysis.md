@@ -1,4 +1,4 @@
-Products:
+Product:
 - name
 - image
 - images
