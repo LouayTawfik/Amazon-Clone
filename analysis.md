@@ -4,7 +4,6 @@ Product:
 - images
 - flag
 - review:
-    - image
     - user
     - date
     - rate
