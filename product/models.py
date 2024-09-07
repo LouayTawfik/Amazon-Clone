@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
 from django.utils.text import slugify
+from django.db.models.aggregates import Avg
 
 FLAG_TYPES = (
     ('Sale', 'Sale'),
@@ -26,6 +27,12 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.name
+    
+    def avg_rate(self):
+        avg = self.review_product.aggregate(rate_avg=Avg('rate'))
+        if not avg['rate_avg']:
+            return 0
+        return avg['rate_avg']
     
     def save(self, *args, **kwargs) -> None:
         self.slug = slugify(self.name)
