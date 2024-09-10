@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
 from django.utils.text import slugify
 from django.db.models.aggregates import Avg
+from django.db.models import Q, Value
 
 FLAG_TYPES = (
     ('Sale', 'Sale'),
@@ -29,9 +30,12 @@ class Product(models.Model):
         return self.name
     
     def avg_rate(self):
-        avg = self.review_product.aggregate(rate_avg=Avg('rate'))
-        if not avg['rate_avg']:
+        if not self.review_product.exists():
             return 0
+
+        avg = self.review_product.aggregate(rate_avg=Avg('rate'))
+        # if not avg['rate_avg']:
+        #     return 0
         return avg['rate_avg']
     
     def save(self, *args, **kwargs) -> None:

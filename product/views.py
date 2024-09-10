@@ -9,6 +9,9 @@ class ProductList(ListView):
     model = Product
     paginate_by = 30
 
+    def get_queryset(self) -> QuerySet[Any]:
+        return super().get_queryset().prefetch_related('review_product')
+        # return super().get_queryset().order_by('id').prefetch_related('review_product')
 
 class ProductDetail(DetailView):
     model = Product
