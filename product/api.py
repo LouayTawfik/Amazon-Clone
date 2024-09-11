@@ -26,6 +26,9 @@ class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
 
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('review_product')
+
 
 class BrandListAPI(generics.ListAPIView):
     queryset = Brand.objects.all()
