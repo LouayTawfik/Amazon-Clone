@@ -19,7 +19,7 @@ class ProductListAPI(generics.ListCreateAPIView):
     serializer_class = ProductListSerializer
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('review_product')
+        return super().get_queryset().select_related('brand').prefetch_related('review_product')
 
 
 class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
