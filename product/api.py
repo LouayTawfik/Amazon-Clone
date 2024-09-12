@@ -1,4 +1,6 @@
 from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from .serializers import ProductListSerializer, ProductDetailSerializer, BrandListSerializer, BrandDetailSerializer
 from .models import Brand, Product
 
@@ -15,11 +17,15 @@ from .models import Brand, Product
 #     return Response({'product': data})
 
 class ProductListAPI(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().select_related('brand').prefetch_related('review_product')
     serializer_class = ProductListSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['flag', 'brand']
+    search_fields = ['name', 'subtitle', 'description']
+    ordering_fields = ['price', 'quantity']
 
-    def get_queryset(self):
-        return super().get_queryset().select_related('brand').prefetch_related('review_product')
+    # def get_queryset(self):
+    #     return super().get_queryset().select_related('brand').prefetch_related('review_product')
 
 
 class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
