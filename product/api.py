@@ -1,6 +1,7 @@
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
 from .filters import ProductFilter
 from .pagination import MyPagination
 from .serializers import ProductListSerializer, ProductDetailSerializer, BrandListSerializer, BrandDetailSerializer
@@ -27,6 +28,7 @@ class ProductListAPI(generics.ListCreateAPIView):
     ordering_fields = ['price', 'quantity']
     filterset_class = ProductFilter
     pagination_class = MyPagination
+    permission_classes = [IsAuthenticated]
 
     # def get_queryset(self):
     #     return super().get_queryset().select_related('brand').prefetch_related('review_product')
