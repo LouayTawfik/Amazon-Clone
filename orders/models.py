@@ -18,6 +18,13 @@ class Cart(models.Model):
     def __str__(self) -> str:
         return str(self.user)
 
+    def cart_total(self):
+        total = 0
+        for item in self.cart_detail.all():
+            item: CartDetail
+            total += item.total
+        return total
+
 
 class CartDetail(models.Model):
     cart = models.ForeignKey(Cart, related_name='cart_detail', on_delete=models.CASCADE)
@@ -69,7 +76,7 @@ class Coupon(models.Model):
 
     def __str__(self) -> str:
         return self.code
-    
+
     def save(self, *args, **kwargs):
         self.end_date = self.start_date + datetime.timedelta(days=7)
         super(Coupon, self).save(*args, **kwargs)
