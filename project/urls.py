@@ -30,7 +30,8 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('', include('settings.urls')),
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls'))
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+    path("i18n/", include("django.conf.urls.i18n")),
 ] + debug_toolbar_urls()
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
