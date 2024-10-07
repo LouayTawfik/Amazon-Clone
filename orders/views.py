@@ -34,6 +34,11 @@ def add_to_cart(request):
     cart_detail.save()
     return redirect(f"/products/{product.slug}")
 
+def remove_from_cart(request, id):
+    cart_detail = CartDetail.objects.get(pk=id)
+    cart_detail.delete()
+    return redirect(f"/products/")
+
 @login_required
 def checkout(request):
     cart = Cart.objects.get(user=request.user, status='InProgress')
