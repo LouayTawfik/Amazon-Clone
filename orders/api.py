@@ -16,6 +16,25 @@ class CartDetailCreateAPI(generics.GenericAPIView):
 
         data = CartSerializer(cart).data
         return Response({'cart': data})
+    
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(username=self.kwargs['username'])
+        product = Product.objects.get(pk=request.data['product_id'])
+        quantity = int(request.data['quantity'])
+        cart = Cart.objects.get(user=user, status='InProgress')
+        cart_detail, created = CartDetail.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_detail.quantity += quantity
+            cart_detail.total = round(cart_detail.quantity * product.price, 2)
+            cart_detail.save()
+            data = CartSerializer(cart).data
+            return Response({'message': 'product updated successfully', 'cart': data})
+        cart_detail.quantity = quantity
+        cart_detail.total = round(cart_detail.quantity * product.price)
+        cart_detail.save()
+
+        data = CartSerializer(cart).data
+        return Response({'message': 'product added successfully', 'cart': data})
 
     def delete(self, request, *args, **kwargs):
         user = User.objects.get(username=self.kwargs['username'])
