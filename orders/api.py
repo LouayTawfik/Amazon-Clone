@@ -11,8 +11,19 @@ from django.db.models import Prefetch
 class CartDetailCreateAPI(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         user = User.objects.get(username=self.kwargs['username'])
-        cart, created = Cart.objects.prefetch_related(Prefetch('cart_detail', queryset=CartDetail.objects.select_related('product'))).get_or_create(user=user)
+        cart, created = Cart.objects.prefetch_related(
+            Prefetch('cart_detail', queryset=CartDetail.objects.select_related('product'))).get_or_create(user=user, status='InProgress')
 
         data = CartSerializer(cart).data
         return Response({'cart': data})
-        
+
+    def delete(self, request, *args, **kwargs):
+        user = User.objects.get(username=self.kwargs['username'])
+        cart_detail = CartDetail.objects.get(pk=request.data['cart_detail_id'])
+
+        cart_detail.delete()
+
+        cart = Cart.objects.prefetch_related(
+            Prefetch('cart_detail', queryset=CartDetail.objects.select_related('product'))).get(user=user, status='InProgress')
+        data = CartSerializer(cart).data
+        return Response({'message': 'product deleted successfully', 'cart': data})
