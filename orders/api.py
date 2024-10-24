@@ -9,6 +9,8 @@ from django.db.models import Prefetch
 
 
 class CartDetailCreateAPI(generics.GenericAPIView):
+    serializer_class = CartSerializer
+
     def get(self, request, *args, **kwargs):
         user = User.objects.get(username=self.kwargs['username'])
         cart, created = Cart.objects.prefetch_related(
