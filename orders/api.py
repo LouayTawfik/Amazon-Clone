@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .serializers import CartSerializer
-from .models import Cart, CartDetail
+from .serializers import CartSerializer, OrderListSerializer
+from .models import Cart, CartDetail, Order
 from product.models import Product
 from django.db.models import Prefetch
 
@@ -48,3 +48,17 @@ class CartDetailCreateAPI(generics.GenericAPIView):
             Prefetch('cart_detail', queryset=CartDetail.objects.select_related('product'))).get(user=user, status='InProgress')
         data = CartSerializer(cart).data
         return Response({'message': 'product deleted successfully', 'cart': data})
+
+
+class OrderListAPI(generics.ListAPIView):
+    serializer_class = OrderListSerializer
+    queryset = Order.objects.select_related('user')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(user__username=self.kwargs['username'])
+        data = OrderListSerializer(queryset, many=True).data
+        return Response(data)
+    
+    # def get_queryset(self):
+    #     queryset = super().get_queryset().filter(user__username=self.kwargs['username'])
+    #     return queryset
