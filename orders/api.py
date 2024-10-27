@@ -3,9 +3,10 @@ from rest_framework import generics
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from .serializers import CartSerializer, OrderListSerializer
-from .models import Cart, CartDetail, Order, OrderDetail
+from .models import Cart, CartDetail, Coupon, Order, OrderDetail
 from product.models import Product
 from django.db.models import Prefetch
+import datetime
 
 
 class CartDetailCreateAPI(generics.GenericAPIView):
@@ -99,4 +100,27 @@ class CreateOrderAPI(generics.GenericAPIView):
 
 
 class ApplyCouponAPI(generics.GenericAPIView):
-    pass
+    
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(username=self.kwargs['username'])
+        cart = Cart.objects.get(user=user, status='InProgress')
+
+        coupon = get_object_or_404(Coupon, code=request.data['coupon_code'])
+
+        if coupon and coupon.quantity > 0:
+            today_date = datetime.datetime.today().date()
+
+            if coupon.start_date <= today_date <= coupon.end_date:
+                coupon_value = cart.cart_total() * coupon.discount / 100
+                cart_total = cart.cart_total() - coupon_value
+
+                coupon.quantity -= 1
+                coupon.save()
+
+                cart.coupon = coupon
+                cart.total_after_coupon = cart_total
+                cart.save()
+                data = CartSerializer(cart).data
+                return Response({'message': 'coupon applied successfully', 'cart': data})
+            return Response({'msessage': 'coupon date is not valid'})
+        return Response({'message': 'no coupon found'})
