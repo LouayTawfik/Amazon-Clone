@@ -1,1 +1,1 @@
-Amazon-Clone
+Django-Greeny-Ecommerce
