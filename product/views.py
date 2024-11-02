@@ -4,12 +4,14 @@ from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from .models import Product, Brand, ProductImages, Review
 from django.db.models.aggregates import Count
+from .tasks import send_emails
 
 class ProductList(ListView):
     model = Product
     paginate_by = 30
 
     def get_queryset(self) -> QuerySet[Any]:
+        # send_emails.delay()
         return super().get_queryset().prefetch_related('review_product')
         # return super().get_queryset().order_by('id').prefetch_related('review_product')
 
