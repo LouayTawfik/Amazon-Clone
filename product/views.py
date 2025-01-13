@@ -6,6 +6,9 @@ from .models import Product, Brand, ProductImages, Review
 from django.db.models.aggregates import Count
 from .tasks import send_emails
 
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
 class ProductList(ListView):
     model = Product
     paginate_by = 30
@@ -63,6 +66,9 @@ def add_review(request, slug):
         review=review,
         user=request.user
     )
+    reviews = Review.objects.filter(product=product)
+    html = render_to_string('include/reviews_include.html', {'reviews': reviews})
+    return JsonResponse({'result': html})
 
-    return redirect(f'/products/{product.slug}')
+    # return redirect(f'/products/{product.slug}')
 
