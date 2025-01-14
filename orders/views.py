@@ -9,6 +9,8 @@ from .models import Cart, Order, OrderDetail, CartDetail, Coupon
 from product.models import Product
 from django.shortcuts import get_object_or_404
 from settings.models import DeliveryFee
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 import datetime
 
 
@@ -68,13 +70,22 @@ def checkout(request):
 
                 total = delivery_fee + cart_total
 
-                return render(request, 'orders/checkout.html', {
+                html = render_to_string('include/checkout_table.html', {
                     'cart_detail': cart_detail,
                     'sub_total': cart_total,
                     'cart_total': total,
                     'coupon': coupon_value,
                     'delivery_fee': delivery_fee
                 })
+                return JsonResponse({'result': html})
+
+                # return render(request, 'orders/checkout.html', {
+                #     'cart_detail': cart_detail,
+                #     'sub_total': cart_total,
+                #     'cart_total': total,
+                #     'coupon': coupon_value,
+                #     'delivery_fee': delivery_fee
+                # })
     sub_total = cart.cart_total()
     total = delivery_fee + sub_total
     coupon = 0
