@@ -7,6 +7,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Cart, Order, OrderDetail, CartDetail, Coupon
 from product.models import Product
+from django.shortcuts import get_object_or_404
+from settings.models import DeliveryFee
+import datetime
+
 
 
 class OrderListView(LoginRequiredMixin, ListView):
@@ -43,4 +47,43 @@ def remove_from_cart(request, id):
 def checkout(request):
     cart = Cart.objects.get(user=request.user, status='InProgress')
     cart_detail = CartDetail.objects.select_related('product__brand').filter(cart=cart)
-    return render(request, 'orders/checkout.html', {'cart_detail': cart_detail})
+    delivery_fee = DeliveryFee.objects.last().fee
+
+    if request.method == 'POST':
+        coupon = get_object_or_404(Coupon, code=request.POST.get('coupon_code'))
+
+        if coupon and coupon.quantity > 0:
+            today_date = datetime.datetime.today().date()
+
+            if coupon.start_date <= today_date <= coupon.end_date:
+                coupon_value = cart.cart_total() * coupon.discount / 100
+                cart_total = cart.cart_total() - coupon_value
+
+                coupon.quantity -= 1
+                coupon.save()
+
+                cart.coupon = coupon
+                cart.total_after_coupon = cart_total
+                cart.save()
+
+                total = delivery_fee + cart_total
+
+                return render(request, 'orders/checkout.html', {
+                    'cart_detail': cart_detail,
+                    'sub_total': cart_total,
+                    'cart_total': total,
+                    'coupon': coupon_value,
+                    'delivery_fee': delivery_fee
+                })
+    sub_total = cart.cart_total()
+    total = delivery_fee + sub_total
+    coupon = 0
+
+
+    return render(request, 'orders/checkout.html', {
+        'cart_detail': cart_detail,
+        'sub_total': sub_total,
+        'cart_total': total,
+        'coupon': coupon,
+        'delivery_fee': delivery_fee
+        })

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'rosetta',
+    'django_extensions',
 
     'product',
     'settings',

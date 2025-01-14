@@ -17,3 +17,10 @@ class Company(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class DeliveryFee(models.Model):
+    fee = models.FloatField()
+
+    def __str__(self):
+        return str(self.fee)
