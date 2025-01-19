@@ -5,10 +5,42 @@ services:
     build: .
     command: python3 manage.py runserver 0.0.0.0:8000
     ports:
-      - "8000:8000"
+      - 8000:8000
     container_name: DjBackend
+    depends_on:
+      - myredis
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/mydatabase # Connection URL
+    # environment:
+    #   POSTGRES_DB: mydatabase
+    #   POSTGRES_USER: postgres
+    #   POSTGRES_PASSWORD: postgres
+
+  db:
+    image: postgres:latest
+    ports:
+      - 5432:5432 # Expose Postgres port (optional, for external tools)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
 
 
   myredis:
     image: redis:7.4.1-alpine
     container_name: MyRedisServer
+
+  
+  celery:
+    build: .
+    command: celery -A project worker --loglevel=info
+    depends_on:
+      - myredis
+      - backend
+
+
+volumes:
+  postgres_data:
